@@ -19,10 +19,10 @@ export default function Classifica({ token }) {
 
   return (
     <div>
-      <h2 style={{textAlign:'center',marginBottom:'1em'}}>Classifica torneo</h2>
-      <table style={{width:'100%',borderCollapse:'collapse',marginTop:12}}>
+      <h2 style={{textAlign:'center',marginBottom:'1em',color:'#222'}}>Classifica torneo</h2>
+      <table style={{width:'100%',borderCollapse:'collapse',marginTop:12,background:'#fff',color:'#222'}}>
         <thead>
-          <tr style={{background:'#f5f6fa'}}>
+          <tr style={{background:'#f5f6fa',color:'#222'}}>
             <th style={{padding:'0.5em',borderBottom:'1px solid #dfe6e9'}}>Nome</th>
             <th style={{padding:'0.5em',borderBottom:'1px solid #dfe6e9'}}>Cognome</th>
             <th style={{padding:'0.5em',borderBottom:'1px solid #dfe6e9'}}>Giocate</th>
@@ -33,11 +33,11 @@ export default function Classifica({ token }) {
         <tbody>
           {classifica.map((p, i) => (
             <tr key={p.id} style={{background:i%2?'#f9f9f9':'#fff'}}>
-              <td style={{padding:'0.5em',borderBottom:'1px solid #f0f0f0'}}>{p.nome}</td>
-              <td style={{padding:'0.5em',borderBottom:'1px solid #f0f0f0'}}>{p.cognome}</td>
-              <td style={{padding:'0.5em',borderBottom:'1px solid #f0f0f0',textAlign:'center'}}>{p.giocate}</td>
-              <td style={{padding:'0.5em',borderBottom:'1px solid #f0f0f0',textAlign:'center'}}>{p.vinte}</td>
-              <td style={{padding:'0.5em',borderBottom:'1px solid #f0f0f0',textAlign:'center'}}>{p.percentualeVittorie.toFixed(1)}%</td>
+              <td style={{padding:'0.5em',borderBottom:'1px solid #f0f0f0',color:'#222'}}>{p.nome}</td>
+              <td style={{padding:'0.5em',borderBottom:'1px solid #f0f0f0',color:'#222'}}>{p.cognome}</td>
+              <td style={{padding:'0.5em',borderBottom:'1px solid #f0f0f0',textAlign:'center',color:'#222'}}>{p.giocate}</td>
+              <td style={{padding:'0.5em',borderBottom:'1px solid #f0f0f0',textAlign:'center',color:'#222'}}>{p.vinte}</td>
+              <td style={{padding:'0.5em',borderBottom:'1px solid #f0f0f0',textAlign:'center',color:'#222'}}>{p.percentualeVittorie.toFixed(1)}%</td>
             </tr>
           ))}
         </tbody>

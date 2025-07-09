@@ -9,7 +9,7 @@ export default function Home() {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const [iscritto, setIscritto] = useState(localStorage.getItem('iscrittoAlTorneo') === 'true');
-  const [organizzatore] = useState(localStorage.getItem('organizzatoreDelTorneo') === 'true');
+  const [organizzatore, setOrganizzatore] = useState(localStorage.getItem('organizzatoreDelTorneo') === 'true');
   const [page, setPage] = useState('partecipanti');
   let email = '', nome = '', cognome = '';
   try {
@@ -45,6 +45,25 @@ export default function Home() {
     }
   };
 
+  const handleDiventaOrganizzatore = async () => {
+    try {
+      const res = await fetch('http://localhost:5161/api/torneo/sono-un-organizzatore', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (res.ok) {
+        setOrganizzatore(true);
+        localStorage.setItem('organizzatoreDelTorneo', 'true');
+        alert('Ora sei organizzatore del torneo!');
+      } else {
+        const data = await res.json();
+        alert(data.message || 'Errore nell\'operazione');
+      }
+    } catch {
+      alert('Errore di rete');
+    }
+  };
+
   return (
     <div style={{minHeight:'100dvh',minWidth:'100vw',display:'flex',flexDirection:'column',background:'#f5f6fa'}}>
       <header style={{padding:'2em 0 1em 0',textAlign:'center',background:'#0984e3',color:'#fff',boxShadow:'0 2px 8px #0001'}}>
@@ -65,6 +84,11 @@ export default function Home() {
             </div>
           ) : (
             <>
+              {!organizzatore && (
+                <div style={{marginBottom:'1.5em',padding:'1em',background:'#dff9fb',borderRadius:8,textAlign:'center'}}>
+                  <button onClick={handleDiventaOrganizzatore} style={{padding:'0.7em 1.5em',borderRadius:6,border:'none',background:'#00b894',color:'#222',fontWeight:'bold',cursor:'pointer',fontSize:'1.1em'}}>Sono un organizzatore</button>
+                </div>
+              )}
               {page === 'partecipanti' && <Partecipanti token={token} />}
               {page === 'incontri' && <Incontri token={token} organizzatore={organizzatore} />}
               {page === 'classifica' && <Classifica token={token} />}

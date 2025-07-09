@@ -7,6 +7,7 @@ import {
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
+import NotFound from './pages/NotFound';
 import { createContext, useState, useContext, useCallback } from 'react';
 
 const NotificationContext = createContext();
@@ -71,6 +72,7 @@ function App() {
               <Home />
             </PrivateRoute>
           } />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </NotificationProvider>
