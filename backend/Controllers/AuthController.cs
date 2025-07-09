@@ -6,6 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using backend.Models.DTO;
 
 namespace backend.Controllers
 {
@@ -23,10 +24,11 @@ namespace backend.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] UserRegisterDto dto)
+        public async Task<IActionResult> Register([FromBody] RegisterRequest dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
-                return BadRequest(new { message = "Email e password sono obbligatori" });
+            if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password) ||
+                string.IsNullOrWhiteSpace(dto.Nome) || string.IsNullOrWhiteSpace(dto.Cognome))
+                return BadRequest(new { message = "Tutti i campi sono obbligatori" });
             if (!dto.Email.Contains("@") || dto.Password.Length < 6)
                 return BadRequest(new { message = "Email non valida o password troppo corta (min 6 caratteri)" });
             if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
@@ -34,8 +36,12 @@ namespace backend.Controllers
 
             var user = new User
             {
+                Nome = dto.Nome,
+                Cognome = dto.Cognome,
                 Email = dto.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+                IscrittoAlTorneo = false,
+                OrganizzatoreDelTorneo = false
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -43,7 +49,7 @@ namespace backend.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserLoginDto dto)
+        public async Task<IActionResult> Login([FromBody] LoginRequest dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
                 return BadRequest(new { message = "Email e password sono obbligatori" });
@@ -52,36 +58,37 @@ namespace backend.Controllers
                 return Unauthorized(new { message = "Credenziali non valide" });
 
             var token = GenerateJwtToken(user);
-            return Ok(new { token });
+            var response = new LoginResponse
+            {
+                Token = token,
+                Nome = user.Nome,
+                Cognome = user.Cognome,
+                Email = user.Email,
+                IscrittoAlTorneo = user.IscrittoAlTorneo,
+                OrganizzatoreDelTorneo = user.OrganizzatoreDelTorneo
+            };
+            return Ok(response);
         }
 
         private string GenerateJwtToken(User user)
         {
             var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"] ?? "super_secret_jwt_key");
             var tokenHandler = new JwtSecurityTokenHandler();
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim("IscrittoAlTorneo", user.IscrittoAlTorneo.ToString()),
+                new Claim("OrganizzatoreDelTorneo", user.OrganizzatoreDelTorneo.ToString())
+            };
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Email, user.Email)
-                }),
+                Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddHours(2),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
-    }
-
-    public class UserRegisterDto
-    {
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
-    public class UserLoginDto
-    {
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
     }
 } 
