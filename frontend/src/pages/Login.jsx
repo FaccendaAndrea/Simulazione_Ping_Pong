@@ -19,6 +19,10 @@ export default function Login() {
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem('token', data.token);
+        localStorage.setItem('nome', data.nome);
+        localStorage.setItem('cognome', data.cognome);
+        localStorage.setItem('iscrittoAlTorneo', data.iscrittoAlTorneo);
+        localStorage.setItem('organizzatoreDelTorneo', data.organizzatoreDelTorneo);
         notify('Login effettuato con successo!', 'success');
         navigate('/');
       } else {
